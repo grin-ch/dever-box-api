@@ -4,6 +4,7 @@ import "github.com/gin-gonic/gin"
 
 const (
 	TokenKey = "token"
+	UserKey  = "RoleBase"
 )
 
 func AuthMiddlewares() []gin.HandlerFunc {
@@ -19,9 +20,11 @@ func authBase(ctx *gin.Context) {
 		return
 	}
 
-	_, err := ParseJWT(token)
+	cliams, err := ParseJWT(token)
 	if err != nil {
 		ctx.Abort()
 		return
 	}
+	ctx.Set(UserKey, cliams.RoleBase)
+	ctx.Next()
 }

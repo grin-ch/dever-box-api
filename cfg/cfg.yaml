@@ -1,0 +1,7 @@
+server:
+  port: 8080
+  mode: "debug"
+token:
+  expire: 7200
+  signed: "dev-box"
+  issuer: "grin"
