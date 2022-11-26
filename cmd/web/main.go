@@ -2,11 +2,13 @@ package main
 
 import (
 	"math/rand"
+	"net/http"
 	"time"
 
 	"github.com/gin-gonic/gin"
 	"github.com/grin-ch/dever-box-api/cfg"
 	"github.com/grin-ch/dever-box-api/cmd/web/action"
+	"github.com/grin-ch/dever-box-api/util"
 	"github.com/grin-ch/grin-utils/log"
 	"github.com/grin-ch/grin-utils/tool"
 )
@@ -17,7 +19,21 @@ func main() {
 
 	gin.SetMode(cfg.Config.Server.Mode)
 	r := action.Router()
-	r.Run(cfg.Config.Server.Addr)
+
+	server := http.Server{
+		Addr:    cfg.Config.Server.Addr,
+		Handler: r,
+	}
+
+	go func() {
+		if err := server.ListenAndServe(); err != nil && err != http.ErrServerClosed {
+			log.Logger.Errorf("server listen err:%s", err)
+		}
+	}()
+	err := util.GracefulStop(server)
+	if err != nil {
+		log.Logger.Errorf("GracefulStop err:%s", err)
+	}
 }
 
 // 初始化通用组件
