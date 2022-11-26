@@ -13,7 +13,7 @@ import (
 var router *gin.Engine
 
 func Router() *gin.Engine {
-	router = gin.Default()
+	router = gin.New()
 	unAuthApi()
 	router.Use(auth.AuthMiddlewares()...)
 

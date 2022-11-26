@@ -5,26 +5,36 @@ import (
 
 	"github.com/gin-gonic/gin"
 	"github.com/grin-ch/dever-box-api/auth"
+	"github.com/grin-ch/dever-box-api/cfg"
 	"github.com/grin-ch/dever-box-api/ctx"
+	"github.com/grin-ch/grin-utils/log"
 	"github.com/grin-ch/grin-utils/tool"
+)
+
+const (
+	RequestID = "Requestid"
 )
 
 func Around(method string, ictx ctx.ICtx) gin.HandlerFunc {
 	return func(gctx *gin.Context) {
+		reqID := fmt.Sprintf("%d", tool.NewSnowFlakeID())
+		gctx.Header(RequestID, reqID)
 		userId := 0
 		value, has := gctx.Get(auth.UserKey)
 		if has {
 			userId = value.(auth.RoleBase).Id
 		}
-		baseCtx := ctx.NewBaseCtx(ictx, userId)
+		baseCtx, cancel := ctx.NewBaseCtx(ictx, userId)
+		defer cancel()
 		defer func() {
 			err := recover()
 			if err != nil {
-				ictx.ErrorHandle(err)
+				baseCtx.ErrorHandle(err)
 				gctx.Header("Content-Type", ctx.JSON)
 				gctx.JSON(200, gin.H{
-					"code": 400,
-					"err":  fmt.Sprintf("%v", err),
+					"code":    400,
+					"err":     fmt.Sprintf("%v", err),
+					RequestID: reqID,
 				})
 			}
 		}()
@@ -34,18 +44,26 @@ func Around(method string, ictx ctx.ICtx) gin.HandlerFunc {
 			gctx.Header("Content-Type", baseCtx.ContextType())
 			defer func() {
 				rsp := baseCtx.Action(gctx)
+				deverLog(gctx, reqID, rsp)
 				switch baseCtx.ContextType() {
 				case ctx.STRING:
 					gctx.String(200, fmt.Sprintf("%v", rsp))
 				case ctx.STREAM: // 自由实现
 				default:
 					gctx.JSON(200, gin.H{
-						"data": rsp,
-						"cost": cost(),
+						"data":    rsp,
+						"cost":    cost(),
+						RequestID: reqID,
 					})
 				}
 			}()
 		}()
 		baseCtx.After()
+	}
+}
+
+func deverLog(gctx *gin.Context, reqID string, rsp any) {
+	if cfg.Config.Server.Debug {
+		log.Logger.Infof("%s:%sdata:%+v", RequestID, reqID, rsp)
 	}
 }
