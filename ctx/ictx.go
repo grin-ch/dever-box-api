@@ -33,15 +33,15 @@ func (GetCtx) Method() string { return http.MethodGet }
 
 type PutCtx struct{ nopCtx }
 
-func (PutCtx) Method() string { return http.MethodGet }
+func (PutCtx) Method() string { return http.MethodPut }
 
 type PostCtx struct{ nopCtx }
 
-func (PostCtx) Method() string { return http.MethodGet }
+func (PostCtx) Method() string { return http.MethodPost }
 
 type DelCtx struct{ nopCtx }
 
-func (DelCtx) Method() string { return http.MethodGet }
+func (DelCtx) Method() string { return http.MethodDelete }
 
 // no op ctx
 type nopCtx struct{ context.Context }
