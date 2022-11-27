@@ -1,16 +1,14 @@
-package web
+package un_auth
 
 import (
 	"time"
 
 	"github.com/gin-gonic/gin"
-	"github.com/grin-ch/dever-box-api/ctx"
+	"github.com/grin-ch/dever-box-api/pkg/ctx"
 )
 
 type Health struct {
 	ctx.GetCtx
-
-	Grin string `req:"grin"`
 }
 
 func (act *Health) Action(ctx *gin.Context) any {

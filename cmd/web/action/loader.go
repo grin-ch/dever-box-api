@@ -6,9 +6,9 @@ import (
 
 	"github.com/gin-gonic/gin"
 	"github.com/grin-ch/dever-box-api/api/web/un_auth"
-	"github.com/grin-ch/dever-box-api/auth"
-	"github.com/grin-ch/dever-box-api/ctx"
-	"github.com/grin-ch/dever-box-api/proxy"
+	"github.com/grin-ch/dever-box-api/pkg/auth"
+	"github.com/grin-ch/dever-box-api/pkg/ctx"
+	"github.com/grin-ch/dever-box-api/pkg/proxy"
 )
 
 var router *gin.Engine

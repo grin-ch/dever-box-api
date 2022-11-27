@@ -3,13 +3,22 @@ server:
   mode: "release" # debug test release
   node: 1
   debug: true
+
 token:
   expire: 7200
   signed: "dev-box"
   issuer: "grin"
+
 log:
   path: "./logs/"
   level: 4
   max_age: 604800
   has_collor: true
   has_caller: true
+
+database:
+  port: 3306
+  host: 192.168.1.104
+  name: devbox
+  user: root
+  passwd: root

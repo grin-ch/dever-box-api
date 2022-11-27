@@ -3,6 +3,8 @@
 package model
 
 import (
+	"time"
+
 	"github.com/grin-ch/dever-box-api/model/schema"
 	"github.com/grin-ch/dever-box-api/model/user"
 )
@@ -25,6 +27,10 @@ func init() {
 	userDescPassword := userFields[3].Descriptor()
 	// user.PasswordValidator is a validator for the "password" field. It is called by the builders before save.
 	user.PasswordValidator = userDescPassword.Validators[0].(func(string) error)
+	// userDescRegTime is the schema descriptor for reg_time field.
+	userDescRegTime := userFields[4].Descriptor()
+	// user.DefaultRegTime holds the default value on creation for the reg_time field.
+	user.DefaultRegTime = userDescRegTime.Default.(func() time.Time)
 	// userDescID is the schema descriptor for id field.
 	userDescID := userFields[0].Descriptor()
 	// user.IDValidator is a validator for the "id" field. It is called by the builders before save.

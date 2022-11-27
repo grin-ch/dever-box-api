@@ -8,14 +8,20 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/grin-ch/dever-box-api/cfg"
 	"github.com/grin-ch/dever-box-api/cmd/web/action"
-	"github.com/grin-ch/dever-box-api/util"
+	"github.com/grin-ch/dever-box-api/pkg/db_srv"
+	"github.com/grin-ch/dever-box-api/pkg/util"
 	"github.com/grin-ch/grin-utils/log"
 	"github.com/grin-ch/grin-utils/tool"
+
+	_ "github.com/go-sql-driver/mysql"
 )
 
 func main() {
 	rand.Seed(time.Now().UnixNano())
 	initCommon()
+
+	dbCancel := db_srv.InitDB(cfg.Config.DB.Dsn())
+	defer dbCancel()
 
 	gin.SetMode(cfg.Config.Server.Mode)
 	r := action.Router()

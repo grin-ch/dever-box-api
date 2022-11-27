@@ -1,6 +1,8 @@
 package schema
 
 import (
+	"time"
+
 	"entgo.io/ent"
 	"entgo.io/ent/schema/field"
 )
@@ -15,9 +17,9 @@ func (User) Fields() []ent.Field {
 	return []ent.Field{
 		field.Int("id").Positive().Comment("自增主键"),
 		field.String("nickname").Unique().NotEmpty().Comment("昵称"),
-		field.String("account").Unique().NotEmpty().Comment("账号"),
+		field.String("account").Unique().NotEmpty().Immutable().Comment("账号"),
 		field.String("password").NotEmpty().Comment("密码"),
-		field.Time("reg_time").Comment("注册时间"),
+		field.Time("reg_time").Default(time.Now).Immutable().Comment("注册时间"),
 	}
 }
 

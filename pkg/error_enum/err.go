@@ -3,7 +3,7 @@ package error_enum
 type errCode int
 type errMsg string
 
-type ErrAble interface {
+type IErr interface {
 	Code() errCode
 	Msg() errMsg
 	Err() string

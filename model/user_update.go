@@ -6,7 +6,6 @@ import (
 	"context"
 	"errors"
 	"fmt"
-	"time"
 
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
@@ -34,21 +33,9 @@ func (uu *UserUpdate) SetNickname(s string) *UserUpdate {
 	return uu
 }
 
-// SetAccount sets the "account" field.
-func (uu *UserUpdate) SetAccount(s string) *UserUpdate {
-	uu.mutation.SetAccount(s)
-	return uu
-}
-
 // SetPassword sets the "password" field.
 func (uu *UserUpdate) SetPassword(s string) *UserUpdate {
 	uu.mutation.SetPassword(s)
-	return uu
-}
-
-// SetRegTime sets the "reg_time" field.
-func (uu *UserUpdate) SetRegTime(t time.Time) *UserUpdate {
-	uu.mutation.SetRegTime(t)
 	return uu
 }
 
@@ -124,11 +111,6 @@ func (uu *UserUpdate) check() error {
 			return &ValidationError{Name: "nickname", err: fmt.Errorf(`model: validator failed for field "User.nickname": %w`, err)}
 		}
 	}
-	if v, ok := uu.mutation.Account(); ok {
-		if err := user.AccountValidator(v); err != nil {
-			return &ValidationError{Name: "account", err: fmt.Errorf(`model: validator failed for field "User.account": %w`, err)}
-		}
-	}
 	if v, ok := uu.mutation.Password(); ok {
 		if err := user.PasswordValidator(v); err != nil {
 			return &ValidationError{Name: "password", err: fmt.Errorf(`model: validator failed for field "User.password": %w`, err)}
@@ -158,14 +140,8 @@ func (uu *UserUpdate) sqlSave(ctx context.Context) (n int, err error) {
 	if value, ok := uu.mutation.Nickname(); ok {
 		_spec.SetField(user.FieldNickname, field.TypeString, value)
 	}
-	if value, ok := uu.mutation.Account(); ok {
-		_spec.SetField(user.FieldAccount, field.TypeString, value)
-	}
 	if value, ok := uu.mutation.Password(); ok {
 		_spec.SetField(user.FieldPassword, field.TypeString, value)
-	}
-	if value, ok := uu.mutation.RegTime(); ok {
-		_spec.SetField(user.FieldRegTime, field.TypeTime, value)
 	}
 	if n, err = sqlgraph.UpdateNodes(ctx, uu.driver, _spec); err != nil {
 		if _, ok := err.(*sqlgraph.NotFoundError); ok {
@@ -192,21 +168,9 @@ func (uuo *UserUpdateOne) SetNickname(s string) *UserUpdateOne {
 	return uuo
 }
 
-// SetAccount sets the "account" field.
-func (uuo *UserUpdateOne) SetAccount(s string) *UserUpdateOne {
-	uuo.mutation.SetAccount(s)
-	return uuo
-}
-
 // SetPassword sets the "password" field.
 func (uuo *UserUpdateOne) SetPassword(s string) *UserUpdateOne {
 	uuo.mutation.SetPassword(s)
-	return uuo
-}
-
-// SetRegTime sets the "reg_time" field.
-func (uuo *UserUpdateOne) SetRegTime(t time.Time) *UserUpdateOne {
-	uuo.mutation.SetRegTime(t)
 	return uuo
 }
 
@@ -295,11 +259,6 @@ func (uuo *UserUpdateOne) check() error {
 			return &ValidationError{Name: "nickname", err: fmt.Errorf(`model: validator failed for field "User.nickname": %w`, err)}
 		}
 	}
-	if v, ok := uuo.mutation.Account(); ok {
-		if err := user.AccountValidator(v); err != nil {
-			return &ValidationError{Name: "account", err: fmt.Errorf(`model: validator failed for field "User.account": %w`, err)}
-		}
-	}
 	if v, ok := uuo.mutation.Password(); ok {
 		if err := user.PasswordValidator(v); err != nil {
 			return &ValidationError{Name: "password", err: fmt.Errorf(`model: validator failed for field "User.password": %w`, err)}
@@ -346,14 +305,8 @@ func (uuo *UserUpdateOne) sqlSave(ctx context.Context) (_node *User, err error) 
 	if value, ok := uuo.mutation.Nickname(); ok {
 		_spec.SetField(user.FieldNickname, field.TypeString, value)
 	}
-	if value, ok := uuo.mutation.Account(); ok {
-		_spec.SetField(user.FieldAccount, field.TypeString, value)
-	}
 	if value, ok := uuo.mutation.Password(); ok {
 		_spec.SetField(user.FieldPassword, field.TypeString, value)
-	}
-	if value, ok := uuo.mutation.RegTime(); ok {
-		_spec.SetField(user.FieldRegTime, field.TypeTime, value)
 	}
 	_node = &User{config: uuo.config}
 	_spec.Assign = _node.assignValues

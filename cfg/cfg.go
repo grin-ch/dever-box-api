@@ -41,10 +41,24 @@ type log struct {
 	HasCaller bool
 }
 
+type database struct {
+	Port   int
+	Host   string
+	Name   string
+	User   string
+	Passwd string
+}
+
+func (db database) Dsn() string {
+	return fmt.Sprintf("%s:%s@tcp(%s:%d)/%s", db.User, db.Passwd, db.Host, db.Port, db.Name) +
+		"?charset=utf8mb4&parseTime=True&loc=Local&timeout=30s"
+}
+
 type config struct {
 	Server server
 	Token  token
 	Log    log
+	DB     database
 }
 
 func initCfg() {
@@ -66,6 +80,13 @@ func initCfg() {
 			MaxAge:    viper.GetInt("log.max_age"),
 			HasCollor: viper.GetBool("log.has_collor"),
 			HasCaller: viper.GetBool("log.has_caller"),
+		},
+		DB: database{
+			Port:   viper.GetInt("database.port"),
+			Host:   viper.GetString("database.host"),
+			Name:   viper.GetString("database.name"),
+			User:   viper.GetString("database.user"),
+			Passwd: viper.GetString("database.passwd"),
 		},
 	}
 }

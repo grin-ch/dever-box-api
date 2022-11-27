@@ -16,5 +16,9 @@ func GracefulStop(server http.Server) error {
 	<-quit
 	ctx, channel := context.WithTimeout(context.Background(), 10*time.Second)
 	defer channel()
+	go func() {
+		time.Sleep(10 * time.Second)
+		panic("UnGracefulStop")
+	}()
 	return server.Shutdown(ctx)
 }
