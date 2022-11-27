@@ -7,6 +7,7 @@ import (
 	"github.com/grin-ch/dever-box-api/auth"
 	"github.com/grin-ch/dever-box-api/cfg"
 	"github.com/grin-ch/dever-box-api/ctx"
+	"github.com/grin-ch/dever-box-api/error_enum"
 	"github.com/grin-ch/grin-utils/log"
 	"github.com/grin-ch/grin-utils/tool"
 )
@@ -31,9 +32,14 @@ func Around(method string, ictx ctx.ICtx) gin.HandlerFunc {
 			if err != nil {
 				baseCtx.ErrorHandle(err)
 				gctx.Header("Content-Type", ctx.JSON)
+				e, ok := err.(error_enum.ErrAble)
+				if !ok {
+					e = error_enum.UndefinedError(err)
+				}
 				gctx.JSON(200, gin.H{
-					"code":    400,
-					"err":     fmt.Sprintf("%v", err),
+					"code":    e.Code(),
+					"msg":     e.Msg(),
+					"err":     e.Err(),
 					RequestID: reqID,
 				})
 			}
