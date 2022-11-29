@@ -8,12 +8,13 @@ import (
 )
 
 type RoleBase struct {
-	Id        int
-	Avatar    string // 头像
-	Nickname  string
-	Sex       int
-	LoginTime int64
-	IpAddr    string
+	Id       int    `json:"id"`
+	UUID     string `json:"uuid"`
+	Avatar   string `json:"avator"` // 头像
+	Nickname string `json:"nickname"`
+	Sex      int    `json:"sex"`
+	Time     int64  `json:"time"`
+	Ip       string `json:"ip"`
 }
 
 type Cliams struct {
@@ -24,7 +25,7 @@ type Cliams struct {
 func GenerateJWT(rBase RoleBase) (string, error) {
 	now := time.Now()
 	expire := now.Add(time.Duration(cfg.Config.Token.Expire) * time.Second)
-	rBase.LoginTime = now.Unix()
+	rBase.Time = now.Unix()
 	claims := Cliams{
 		RoleBase: rBase,
 		StandardClaims: jwt.StandardClaims{

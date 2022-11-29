@@ -2,56 +2,46 @@ package ctx
 
 import (
 	"context"
-	"net/http"
 
 	"github.com/gin-gonic/gin"
+	"github.com/grin-ch/dever-box-api/pkg/auth"
 )
 
 const (
 	JSON   = "application/json"
 	STRING = "application/text"
-	STREAM = "application/octet-stream"
 )
 
 type ICtx interface {
+	ICache[string, any]
 	context.Context
-	UserID() int
-	Before()
-	Action(*gin.Context) any
-	After()
-	ErrorHandle(any)
-
-	Method() string
-	Module() string
-	Path() string
-	ContextType() string
+	GinCtx() *gin.Context
+	JwtCliam() *auth.Cliams
+	ClientIP() string
 }
 
-type GetCtx struct{ nopCtx }
+func NewBaseCtx(ctx context.Context, gctx *gin.Context) ICtx {
+	var c *auth.Cliams
+	cliam, has := gctx.Get(auth.CliamsKey)
+	if has {
+		c = cliam.(*auth.Cliams)
+	}
+	bctx := &baseCtx{
+		Context:  ctx,
+		ctxCache: newCtxCache[string, any](),
+		gctx:     gctx,
+		cliam:    c,
+	}
+	return bctx
+}
 
-func (GetCtx) Method() string { return http.MethodGet }
+type baseCtx struct {
+	context.Context
+	*ctxCache[string, any]
+	gctx  *gin.Context
+	cliam *auth.Cliams
+}
 
-type PutCtx struct{ nopCtx }
-
-func (PutCtx) Method() string { return http.MethodPut }
-
-type PostCtx struct{ nopCtx }
-
-func (PostCtx) Method() string { return http.MethodPost }
-
-type DelCtx struct{ nopCtx }
-
-func (DelCtx) Method() string { return http.MethodDelete }
-
-// no op ctx
-type nopCtx struct{ context.Context }
-
-func (nopCtx) UserID() int             { return 0 }
-func (nopCtx) Before()                 {}
-func (nopCtx) Action(*gin.Context) any { return nil }
-func (nopCtx) After()                  {}
-func (ctx nopCtx) ErrorHandle(err any) {}
-func (nopCtx) Method() string          { return "" }
-func (nopCtx) Module() string          { return "" }
-func (nopCtx) Path() string            { return "" }
-func (nopCtx) ContextType() string     { return JSON }
+func (ctx *baseCtx) GinCtx() *gin.Context   { return ctx.gctx }
+func (ctx *baseCtx) JwtCliam() *auth.Cliams { return ctx.cliam }
+func (ctx *baseCtx) ClientIP() string       { return ctx.gctx.ClientIP() }

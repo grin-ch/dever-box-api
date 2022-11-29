@@ -11,12 +11,11 @@ type Health struct {
 	ctx.GetCtx
 }
 
-func (act *Health) Action(ctx *gin.Context) any {
+func (act *Health) Action() any {
 	now := time.Now()
 	return gin.H{
 		"time":    now.Format("2006-01-02 15:04:05"),
 		"weekday": now.Weekday().String(),
-		"userId":  act.UserID(),
 	}
 }
 

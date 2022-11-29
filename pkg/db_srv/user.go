@@ -4,16 +4,21 @@ import (
 	"context"
 
 	"github.com/grin-ch/dever-box-api/model"
-	"github.com/grin-ch/dever-box-api/pkg/error_enum"
+	"github.com/grin-ch/dever-box-api/model/user"
 )
 
-// 创建用户
+// CreateUser 创建用户
 func CreateUser(ctx context.Context, nickname, account, passwd string) *model.User {
 	user, err := client.User.Create().
 		SetAccount(account).
 		SetNickname(nickname).
 		SetPassword(passwd).
 		Save(ctx)
-	error_enum.ErrPanic(err, error_enum.ExecSQLError)
-	return user
+	return mustExec(user, err)
+}
+
+// FindUserByAccount 查询用户
+func FindUserByAccount(ctx context.Context, account string) *model.User {
+	user, err := client.User.Query().Where(user.Account(account)).Only(ctx)
+	return mustExec(user, err)
 }

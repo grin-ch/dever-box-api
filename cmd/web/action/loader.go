@@ -5,7 +5,8 @@ import (
 	"net/http"
 
 	"github.com/gin-gonic/gin"
-	"github.com/grin-ch/dever-box-api/api/web/un_auth"
+	"github.com/grin-ch/dever-box-api/pkg/api/web/un_auth"
+	"github.com/grin-ch/dever-box-api/pkg/api/web/user"
 	"github.com/grin-ch/dever-box-api/pkg/auth"
 	"github.com/grin-ch/dever-box-api/pkg/ctx"
 	"github.com/grin-ch/dever-box-api/pkg/proxy"
@@ -19,6 +20,7 @@ func Router() *gin.Engine {
 	unAuthApi()
 	router.Use(auth.AuthMiddlewares()...)
 
+	registryUser()
 	return router
 }
 
@@ -40,15 +42,15 @@ func cors() gin.HandlerFunc {
 	}
 }
 
-func registery(ctx ctx.ICtx) {
+func registery(act ctx.IAction) {
 	var url string
-	if ctx.Module() != "" {
-		url = fmt.Sprintf("/%s", ctx.Path())
+	if act.Module() == "" {
+		url = fmt.Sprintf("/%s", act.Path())
 	} else {
-		url = fmt.Sprintf("/%s/%s", ctx.Module(), ctx.Path())
+		url = fmt.Sprintf("/%s/%s", act.Module(), act.Path())
 	}
 
-	router.Handle(ctx.Method(), url, proxy.Around(ctx.Method(), ctx))
+	router.Handle(act.Method(), url, proxy.Around(act.Method(), act))
 }
 
 // 无需验证身份的接口
@@ -56,4 +58,8 @@ func unAuthApi() {
 	registery(&un_auth.Health{})
 	registery(&un_auth.SignUp{})
 	registery(&un_auth.SignIn{})
+}
+
+func registryUser() {
+	registery((&user.Info{}))
 }

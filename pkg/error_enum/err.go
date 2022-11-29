@@ -24,5 +24,8 @@ func (err *errAble) Msg() errMsg {
 }
 
 func (err *errAble) Err() string {
+	if err.err == nil {
+		return ""
+	}
 	return err.err.Error()
 }

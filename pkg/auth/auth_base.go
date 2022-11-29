@@ -1,10 +1,16 @@
 package auth
 
-import "github.com/gin-gonic/gin"
+import (
+	"net/http"
+	"strings"
+
+	"github.com/gin-gonic/gin"
+	"github.com/grin-ch/dever-box-api/pkg/error_enum"
+)
 
 const (
-	TokenKey = "token"
-	UserKey  = "RoleBase"
+	TokenKey  = "Authorization"
+	CliamsKey = "CliamsKey"
 )
 
 func AuthMiddlewares() []gin.HandlerFunc {
@@ -15,16 +21,20 @@ func AuthMiddlewares() []gin.HandlerFunc {
 
 func authBase(ctx *gin.Context) {
 	token := ctx.GetHeader(TokenKey)
-	if token == "" {
-		ctx.Abort()
-		return
+	if token != "" {
+		token = strings.Replace(token, "Bearer ", "", 1)
+		cliams, err := ParseJWT(token)
+		if err == nil {
+			ctx.Set(CliamsKey, cliams)
+			ctx.Next()
+			return
+		}
 	}
 
-	cliams, err := ParseJWT(token)
-	if err != nil {
-		ctx.Abort()
-		return
-	}
-	ctx.Set(UserKey, cliams.RoleBase)
-	ctx.Next()
+	ctx.Abort()
+	e := error_enum.UndefinedError(nil)
+	ctx.JSON(http.StatusOK, gin.H{
+		"code": e.Code(),
+		"msg":  e.Msg(),
+	})
 }

@@ -27,3 +27,8 @@ func InitDB(dsn string) func() error {
 	}
 	return client.Close
 }
+
+func mustExec[T any](rsp T, err error) T {
+	error_enum.ErrPanic(err, error_enum.ExecSQLError)
+	return rsp
+}

@@ -1,11 +1,12 @@
 package proxy
 
 import (
+	"context"
 	"fmt"
+	"time"
 
 	"github.com/gin-gonic/gin"
 	"github.com/grin-ch/dever-box-api/cfg"
-	"github.com/grin-ch/dever-box-api/pkg/auth"
 	"github.com/grin-ch/dever-box-api/pkg/ctx"
 	"github.com/grin-ch/dever-box-api/pkg/error_enum"
 	"github.com/grin-ch/grin-utils/log"
@@ -16,60 +17,65 @@ const (
 	RequestID = "Requestid"
 )
 
-func Around(method string, ictx ctx.ICtx) gin.HandlerFunc {
+func Around(method string, act ctx.IAction) gin.HandlerFunc {
 	return func(gctx *gin.Context) {
-		reqID := fmt.Sprintf("%d", tool.NewSnowFlakeID())
+		reqID := gctx.GetHeader(RequestID)
 		gctx.Header(RequestID, reqID)
-		userId := 0
-		value, has := gctx.Get(auth.UserKey)
-		if has {
-			userId = value.(auth.RoleBase).Id
-		}
-		baseCtx, cancel := ctx.NewBaseCtx(ictx, userId)
+		context, cancel := context.WithTimeout(gctx, 3*time.Second)
 		defer cancel()
+		baseCtx := ctx.NewBaseCtx(context, gctx)
+		baseCtx.Set(ctx.Method, act.Method())
+		baseCtx.Set(ctx.Module, act.Module())
+		baseCtx.Set(ctx.Path, act.Path())
 		defer func() {
 			err := recover()
 			if err != nil {
-				baseCtx.ErrorHandle(err)
+				act.ErrorHandle(err)
 				gctx.Header("Content-Type", ctx.JSON)
 				e, ok := err.(error_enum.IErr)
 				if !ok {
 					e = error_enum.UndefinedError(err)
 				}
-				gctx.JSON(200, gin.H{
-					"code":    e.Code(),
-					"msg":     e.Msg(),
-					"err":     e.Err(),
-					RequestID: reqID,
-				})
+				gctx.JSON(200, deverErr(e))
 			}
 		}()
-		baseCtx.Before()
+		act.Before(baseCtx)
+		error_enum.ErrPanic(gctx.ShouldBind(act), error_enum.MissingParameter)
 		func() {
 			cost := tool.Cost()
-			gctx.Header("Content-Type", baseCtx.ContextType())
+			gctx.Header("Content-Type", act.ContextType())
 			defer func() {
-				rsp := baseCtx.Action(gctx)
-				deverLog(gctx, reqID, rsp)
-				switch baseCtx.ContextType() {
+				rsp := act.Action()
+				deverLog(act, reqID, rsp)
+				switch act.ContextType() {
 				case ctx.STRING:
 					gctx.String(200, fmt.Sprintf("%v", rsp))
-				case ctx.STREAM: // 自由实现
-				default:
+				case ctx.JSON:
 					gctx.JSON(200, gin.H{
-						"data":    rsp,
-						"cost":    cost(),
-						RequestID: reqID,
+						"data": rsp,
+						"cost": cost(),
 					})
+				default: //自由处理
 				}
 			}()
 		}()
-		baseCtx.After()
+		act.After(baseCtx)
 	}
 }
 
-func deverLog(gctx *gin.Context, reqID string, rsp any) {
+func deverErr(e error_enum.IErr) gin.H {
+	rsp := gin.H{
+		"code": e.Code(),
+		"msg":  e.Msg(),
+	}
 	if cfg.Config.Server.Debug {
-		log.Logger.Infof("%s:%sdata:%+v", RequestID, reqID, rsp)
+		rsp["err"] = e.Err()
+	}
+	return rsp
+}
+
+func deverLog(act ctx.IAction, reqID string, rsp any) {
+	if cfg.Config.Server.Debug {
+		log.Logger.Infof("%s :%s IP:%s data:%+v", RequestID, reqID, act.ClientIP(), rsp)
 	}
 }
