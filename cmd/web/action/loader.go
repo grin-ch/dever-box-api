@@ -5,10 +5,12 @@ import (
 	"net/http"
 
 	"github.com/gin-gonic/gin"
+	"github.com/grin-ch/dever-box-api/cfg"
 	"github.com/grin-ch/dever-box-api/pkg/api/web/un_auth"
 	"github.com/grin-ch/dever-box-api/pkg/api/web/user"
-	"github.com/grin-ch/dever-box-api/pkg/auth"
 	"github.com/grin-ch/dever-box-api/pkg/ctx"
+	"github.com/grin-ch/dever-box-api/pkg/middleware/auth"
+	"github.com/grin-ch/dever-box-api/pkg/middleware/rate_limit"
 	"github.com/grin-ch/dever-box-api/pkg/proxy"
 )
 
@@ -17,6 +19,10 @@ var router *gin.Engine
 func Router() *gin.Engine {
 	router = gin.New()
 	router.Use(cors())
+	router.Use(rate_limit.RateLimiter(
+		float64(cfg.Config.RateLimiter.Limit),
+		cfg.Config.RateLimiter.Burst,
+	)...)
 	unAuthApi()
 	router.Use(auth.AuthMiddlewares()...)
 

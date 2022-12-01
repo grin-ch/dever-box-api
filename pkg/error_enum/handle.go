@@ -26,6 +26,20 @@ func UndefinedError(err any) *errAble {
 	return e
 }
 
+func EnumData(code errCode, args ...interface{}) interface{} {
+	msg, has := codeEnumMap[code]
+	if !has {
+		msg = UndefinedError(nil).msg
+	}
+	if len(args) > 0 {
+		msg = errMsg(fmt.Sprintf(string(msg), args...))
+	}
+	return map[string]any{
+		"code": code,
+		"msg":  msg,
+	}
+}
+
 func ErrPanic(err error, code errCode, args ...interface{}) {
 	if err == nil {
 		return

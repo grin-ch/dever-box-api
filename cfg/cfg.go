@@ -27,6 +27,10 @@ type server struct {
 	Debug bool
 }
 
+type rateLimit struct {
+	Limit float64
+	Burst int
+}
 type token struct {
 	Expire int
 	Signed string
@@ -55,10 +59,11 @@ func (db database) Dsn() string {
 }
 
 type config struct {
-	Server server
-	Token  token
-	Log    log
-	DB     database
+	Server      server
+	RateLimiter rateLimit
+	Token       token
+	Log         log
+	DB          database
 }
 
 func initCfg() {
@@ -68,6 +73,10 @@ func initCfg() {
 			Mode:  viper.GetString("server.mode"),
 			Node:  viper.GetInt64("server.node"),
 			Debug: viper.GetBool("server.debug"),
+		},
+		RateLimiter: rateLimit{
+			Limit: viper.GetFloat64("rate_limit.limit"),
+			Burst: viper.GetInt("rate_limit.burst"),
 		},
 		Token: token{
 			Expire: viper.GetInt("token.expire"),

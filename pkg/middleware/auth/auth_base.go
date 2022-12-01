@@ -31,10 +31,6 @@ func authBase(ctx *gin.Context) {
 		}
 	}
 
+	ctx.JSON(http.StatusOK, error_enum.EnumData(error_enum.AuthError))
 	ctx.Abort()
-	e := error_enum.UndefinedError(nil)
-	ctx.JSON(http.StatusOK, gin.H{
-		"code": e.Code(),
-		"msg":  e.Msg(),
-	})
 }

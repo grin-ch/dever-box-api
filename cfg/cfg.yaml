@@ -4,6 +4,10 @@ server:
   node: 1
   debug: true
 
+rate_limit:
+  limit: 15
+  burst: 35
+
 token:
   expire: 7200
   signed: "dev-box"

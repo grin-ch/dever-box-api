@@ -7,6 +7,7 @@ const (
 
 const (
 	UnknownError = _COMMON_ENUM + iota + 1
+	ServerBusy
 	ExecSQLError
 	MissingParameter
 )
@@ -18,6 +19,7 @@ const (
 // 通用异常
 func setCommonEnum() {
 	setErrEnum(UnknownError, "UnknownError")
+	setErrEnum(ServerBusy, "ServerBusy")
 	setErrEnum(ExecSQLError, "ExecSQLError")
 	setErrEnum(MissingParameter, "MissingParameter")
 }

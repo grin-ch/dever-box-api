@@ -2,10 +2,10 @@ package user_cmp
 
 import (
 	"github.com/grin-ch/dever-box-api/model"
-	"github.com/grin-ch/dever-box-api/pkg/auth"
 	"github.com/grin-ch/dever-box-api/pkg/ctx"
 	"github.com/grin-ch/dever-box-api/pkg/db_srv"
 	"github.com/grin-ch/dever-box-api/pkg/error_enum"
+	"github.com/grin-ch/dever-box-api/pkg/middleware/auth"
 	"github.com/grin-ch/grin-utils/tool"
 	"golang.org/x/crypto/bcrypt"
 )
