@@ -3,10 +3,18 @@ server:
   mode: "release" # debug test release
   node: 1
   debug: true
+pprof:
+  enable: true
+  port: 6060
 
 rate_limit:
   limit: 15
   burst: 35
+
+api_deadline:
+  default: 5
+  appoint:
+    health: 3
 
 token:
   expire: 7200

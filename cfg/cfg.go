@@ -27,6 +27,15 @@ type server struct {
 	Debug bool
 }
 
+type pprof struct {
+	Enable bool
+	Port   int
+}
+
+type apiDeadline struct {
+	Default int
+	Appoint map[string]int
+}
 type rateLimit struct {
 	Limit float64
 	Burst int
@@ -60,7 +69,9 @@ func (db database) Dsn() string {
 
 type config struct {
 	Server      server
+	Pprof       pprof
 	RateLimiter rateLimit
+	ApiDeadline apiDeadline
 	Token       token
 	Log         log
 	DB          database
@@ -74,9 +85,17 @@ func initCfg() {
 			Node:  viper.GetInt64("server.node"),
 			Debug: viper.GetBool("server.debug"),
 		},
+		Pprof: pprof{
+			Enable: viper.GetBool("pprof.enable"),
+			Port:   viper.GetInt("pprof.port"),
+		},
 		RateLimiter: rateLimit{
 			Limit: viper.GetFloat64("rate_limit.limit"),
 			Burst: viper.GetInt("rate_limit.burst"),
+		},
+		ApiDeadline: apiDeadline{
+			Default: viper.GetInt("api_deadline.default"),
+			Appoint: mapToInt(viper.GetStringMap("api_deadline.appoint")),
 		},
 		Token: token{
 			Expire: viper.GetInt("token.expire"),
@@ -98,6 +117,16 @@ func initCfg() {
 			Passwd: viper.GetString("database.passwd"),
 		},
 	}
+}
+
+func mapToInt(m1 map[string]any) map[string]int {
+	m2 := make(map[string]int, len(m1))
+	for k, v := range m1 {
+		if val, ok := v.(int); ok {
+			m2[k] = val
+		}
+	}
+	return m2
 }
 
 func setFileConfig() {

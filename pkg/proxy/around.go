@@ -21,7 +21,8 @@ func Around(method string, act ctx.IAction) gin.HandlerFunc {
 	return func(gctx *gin.Context) {
 		reqID := gctx.GetHeader(RequestID)
 		gctx.Header(RequestID, reqID)
-		context, cancel := context.WithTimeout(gctx, 3*time.Second)
+		deadline := time.Duration(apiTimeOut(act.Module(), act.Path()))
+		context, cancel := context.WithTimeout(gctx, deadline*time.Second)
 		defer cancel()
 		baseCtx := ctx.NewBaseCtx(context, gctx)
 		baseCtx.Set(ctx.Method, act.Method())
@@ -61,6 +62,17 @@ func Around(method string, act ctx.IAction) gin.HandlerFunc {
 		}()
 		act.After(baseCtx)
 	}
+}
+
+func apiTimeOut(module, path string) int {
+	key := path
+	if module != "" {
+		key = module + "-" + key
+	}
+	if t, has := cfg.Config.ApiDeadline.Appoint[key]; has {
+		return t
+	}
+	return cfg.Config.ApiDeadline.Default
 }
 
 func deverErr(e error_enum.IErr) gin.H {
