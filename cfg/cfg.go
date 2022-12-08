@@ -16,7 +16,8 @@ const (
 )
 
 var (
-	cfg_paths     = []string{"./", "./cfg"}
+	first_path    = "./.cfg" // 优先配置
+	default_path  = "./cfg"  // 默认配置
 	cfg_file_name = "cfg.yaml"
 )
 
@@ -62,6 +63,13 @@ type database struct {
 	Passwd string
 }
 
+type oss struct {
+	Bucket    string
+	AccessKey string
+	SecretKey string
+	Expire    int
+}
+
 func (db database) Dsn() string {
 	return fmt.Sprintf("%s:%s@tcp(%s:%d)/%s", db.User, db.Passwd, db.Host, db.Port, db.Name) +
 		"?charset=utf8mb4&parseTime=True&loc=Local&timeout=30s"
@@ -75,6 +83,7 @@ type config struct {
 	Token       token
 	Log         log
 	DB          database
+	OSS         oss
 }
 
 func initCfg() {
@@ -116,6 +125,12 @@ func initCfg() {
 			User:   viper.GetString("database.user"),
 			Passwd: viper.GetString("database.passwd"),
 		},
+		OSS: oss{
+			Bucket:    viper.GetString("oss.bucket"),
+			AccessKey: viper.GetString("oss.access_key"),
+			SecretKey: viper.GetString("oss.secret_key"),
+			Expire:    viper.GetInt("oss.expire"),
+		},
 	}
 }
 
@@ -127,6 +142,18 @@ func mapToInt(m1 map[string]any) map[string]int {
 		}
 	}
 	return m2
+}
+
+func defaultCfg() *viper.Viper {
+	vp := viper.New()
+	vp.AddConfigPath(first_path)
+	vp.AddConfigPath(default_path)
+	vp.SetConfigName(cfg_file_name)
+	vp.SetConfigType("yaml")
+	if err := vp.ReadInConfig(); err != nil {
+		panic(err)
+	}
+	return vp
 }
 
 func setFileConfig() {
@@ -145,10 +172,12 @@ func setEnvConfig() {
 }
 
 func init() {
-	for _, path := range cfg_paths {
-		viper.AddConfigPath(path)
-	}
+	viper.AddConfigPath(default_path)
 	setEnvConfig()
+	vp := defaultCfg()
+	for k, v := range vp.AllSettings() {
+		viper.Set(k, v)
+	}
 	setFileConfig()
 	initCfg()
 }

@@ -7,10 +7,12 @@ pprof:
   enable: true
   port: 6060
 
+# 限流
 rate_limit:
   limit: 15
   burst: 35
 
+# 接口超时
 api_deadline:
   default: 5
   appoint:
@@ -20,17 +22,26 @@ token:
   expire: 7200
   signed: "dev-box"
   issuer: "grin"
-
+  
+# 日志
 log:
   path: "./logs/"
-  level: 4
+  level: 4  # info
   max_age: 604800
-  has_collor: true
+  has_collor: false
   has_caller: true
 
+# 数据库
 database:
   port: 3306
   host: 192.168.1.104
   name: devbox
   user: root
   passwd: root
+
+# 七牛云oss
+oss:
+  bucket: "bucket"
+  access_key: "ak"
+  secret_key: "sk"
+  expire: 3600
