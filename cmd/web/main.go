@@ -9,6 +9,7 @@ import (
 	"github.com/grin-ch/dever-box-api/cfg"
 	"github.com/grin-ch/dever-box-api/cmd/web/action"
 	"github.com/grin-ch/dever-box-api/pkg/db_srv"
+	"github.com/grin-ch/dever-box-api/pkg/middleware/qiniu"
 	"github.com/grin-ch/dever-box-api/pkg/util"
 	"github.com/grin-ch/grin-utils/log"
 	"github.com/grin-ch/grin-utils/tool"
@@ -52,7 +53,14 @@ func initCommon() {
 		log.WithCaller(cfg.Config.Log.HasCaller),
 		log.WithMaxAge(time.Duration(cfg.Config.Log.MaxAge)*time.Second),
 	)
-
 	// 雪花算法
 	tool.InitSnowflakeNode(cfg.Config.Server.Node)
+
+	// 七牛oss
+	qiniu.InitOSS(
+		cfg.Config.OSS.Bucket,
+		cfg.Config.OSS.AccessKey,
+		cfg.Config.OSS.SecretKey,
+		cfg.Config.OSS.Expire,
+	)
 }
