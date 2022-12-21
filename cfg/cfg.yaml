@@ -1,0 +1,36 @@
+server:
+  port: 8080
+  mode: "release" # debug test release
+  node: 1
+  debug: true
+pprof:
+  enable: true
+  port: 6060
+
+rate_limit:
+  limit: 15
+  burst: 35
+
+api_deadline:
+  default: 5
+  appoint:
+    health: 3
+
+token:
+  expire: 7200
+  signed: "dev-box"
+  issuer: "grin"
+
+log:
+  path: "./logs/"
+  level: 4
+  max_age: 604800
+  has_collor: true
+  has_caller: true
+
+database:
+  port: 3306
+  host: 192.168.1.104
+  name: devbox
+  user: root
+  passwd: root
