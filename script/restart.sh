@@ -29,6 +29,8 @@ fi
 if [ $target = "web" ];then
     echo "docker run --rm -d -p 8080:8080 --name $name $target:$version"
     docker run --rm -d -p 8080:8080 --name $name \
+        -v /etc/localtime:/etc/localtime \
+        -v /etc/timezone:/etc/timezone \
         -v $home/logs:/apps/logs \
         -v $home/cfg:/apps/.cfg $target:$version
 fi 
